@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -14,8 +14,11 @@ class Todo(db.Model):
     title = db.Column(db.String(100))
     complete = db.Column(db.Boolean)
 
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
+    new_todo = Todo(title='todo 1', complete=False)
+    db.session.add(new_todo)
+    db.session.commit()
 
 @app.route('/')
 def index():
@@ -23,12 +26,34 @@ def index():
     #show all to-do's
     todo_list = Todo.query.all()
     print(todo_list)
-    return render_template('base.html')
+    return render_template('base.html', todo_list=todo_list)
 
-if __name__ == "__main__":
-    db.create_all()
-    new_todo = Todo(title='todo 1', complete=False)
+@app.route("/add", methods=["POST"])
+def add():
+    # add new item
+    title = request.form.get("title")
+    new_todo = Todo(title=title, complete = False)
     db.session.add(new_todo)
     db.session.commit()
+    return redirect(url_for("index"))
+
+
+@app.route("/update/<int:todo_id>")
+def update(todo_id):
+    # update item
+    todo = Todo.query.filter_by(id=todo_id).first()
+    todo.complete = not todo.complete
+    db.session.commit()
+    return redirect(url_for("index"))
+
+@app.route("/delete/<int:todo_id>")
+def delete(todo_id):
+    # update item
+    todo = Todo.query.filter_by(id=todo_id).first()
+    db.session.delete(todo)
+    db.session.commit()
+    return redirect(url_for("index"))
+
+if __name__ == "__main__": 
 
     app.run(debug=True)
