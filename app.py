@@ -10,13 +10,13 @@ db = SQLAlchemy(app)
 
 # creating a module in our database that will inherit db.module
 class Todo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True) 
     title = db.Column(db.String(100))
     complete = db.Column(db.Boolean)
 
 with app.app_context():
     db.create_all()
-    new_todo = Todo(title='todo 1', complete=False)
+    new_todo = Todo(title=None, complete=None)
     db.session.add(new_todo)
     db.session.commit()
 
@@ -56,4 +56,4 @@ def delete(todo_id):
 
 if __name__ == "__main__": 
 
-    app.run(debug=True)
+    app.run(debug=True) 
